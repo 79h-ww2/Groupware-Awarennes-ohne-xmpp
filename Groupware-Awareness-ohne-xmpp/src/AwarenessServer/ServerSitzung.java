@@ -63,6 +63,9 @@ public class ServerSitzung implements Runnable{
 						if (feld1.equals("quit")){
 							quit = true;
 						}
+						else if(feld1.equals("get-kontaktlist")){
+							
+						}
 						
 						//Schließt die Datenbankverbindung
 						dbZugriff.verbindungSchliessen();
