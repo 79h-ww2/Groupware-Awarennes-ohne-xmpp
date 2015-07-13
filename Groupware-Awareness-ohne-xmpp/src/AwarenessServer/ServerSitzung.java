@@ -58,47 +58,23 @@ public class ServerSitzung implements Runnable{
 
 					//wenn das Array ein Feld besitzt
 					if(arrClientAnfrage.length > 0){
-						
-						//stellt eine Verbindung zur Datenbank her
-						Datenbankzugriff dbZugriff = new Datenbankzugriff();
-						
+												
 						//überprüft aus den ersten Feld den Typ der Anfrage
 						String feld1 = arrClientAnfrage[0];
 						
-						/*
-						 * Client möchte die Verbindung schließen
-						 */
+						
+						//Client schließt Verbindung
 						if (feld1.equals("quit")){
 							quit = true;
 						}
-						
-						/*
-						 * übertragen der Kontaktliste
-						 */
+						//Übertragen der Kontaktliste
 						else if(feld1.equals("get-kontaktlist")){
-							if ( arrClientAnfrage.length == 2){
-								System.out.printf("Der Client %s fragt die Kontaktliste ab.%n", sitzung.getInetAddress().getHostAddress());
-								
-								//fragt von der Datenbank die Kontaktliste ab
-								ResultSet kontaktliste = dbZugriff.get_kontaktliste(arrClientAnfrage[1]);
-								String kontaktliste_str ="";
-								
-								//geht jede Zeile der Kontaktliste durch
-								while(kontaktliste.next()){
-									//erstellt aus der Kontaktliste einen String, der via TCP übermittelt werden kann
-									kontaktliste_str = "(" + kontaktliste.getString(0) + "," + kontaktliste.getBoolean(1) + "," + kontaktliste.getString(2) + "," + kontaktliste.getString(3) + ")";
-									
-									//sendet die Kontaktlistenzeile an den Client
-									serverAntwort.println(kontaktliste_str);
-								}
-								
-								//teilt den Client mit, dass die Kontaktliste zu Ende ist
-								serverAntwort.println("§Ende$");
-							};
+							kontaktlisteSenden(serverAntwort, arrClientAnfrage);
 						}
-						
-						//Schließt die Datenbankverbindung
-						dbZugriff.verbindungSchliessen();
+						//Einen Benutzer hinzufügen
+						if (feld1.equals("set-neuer-benutzer")){
+							
+						}
 					}
 				}
 			}while(!quit);
@@ -113,6 +89,34 @@ public class ServerSitzung implements Runnable{
 		}finally{
 			System.out.printf("Die Verbindung zum Client %s wurde getrennt.%n", sitzung.getInetAddress().getHostAddress());
 		}
+	}
+	
+	/**
+	 * Sendet die Kontaktliste an den Client
+	 * @throws SQLException 
+	 */
+	public void kontaktlisteSenden(PrintStream ausgabeServer, String[] clientAnfrage) throws SQLException{
+		
+		//stellt eine Verbindung zur Datenbank her
+		Datenbankzugriff dbZugriff = new Datenbankzugriff();
+		
+		System.out.printf("Der Client %s fragt die Kontaktliste ab.%n", sitzung.getInetAddress().getHostAddress());
+		
+		//fragt von der Datenbank die Kontaktliste ab
+		ResultSet kontaktliste = dbZugriff.get_kontaktliste(clientAnfrage[1]);
+		String kontaktliste_str ="";
+		
+		//geht jede Zeile der Kontaktliste durch
+		while(kontaktliste.next()){
+			//erstellt aus der Kontaktliste einen String, der via TCP übermittelt werden kann
+			kontaktliste_str = "(" + kontaktliste.getString(0) + "," + kontaktliste.getBoolean(1) + "," + kontaktliste.getString(2) + "," + kontaktliste.getString(3) + ")";
+			
+			//sendet die Kontaktlistenzeile an den Client
+			ausgabeServer.println(kontaktliste_str);
+		}
+		
+		//teilt den Client mit, dass die Kontaktliste zu Ende ist
+		ausgabeServer.println("§Ende§");
 	}
 
 }

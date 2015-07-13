@@ -53,6 +53,10 @@ public class ServerMain {
 			
 			//wartet, bis ein Client die Verbindung zum Server aufbaut
 			while(true){
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+				}
 				Socket sitzung = server.accept();
 				
 				//eröffnet einen Thread, der die Sitzung abarbeitet
