@@ -12,7 +12,7 @@ public class Datenbankzugriff {
 	private Connection con;
 
 	/**
-	 * Konstruktor der Klasse
+	 * Konstruktor der Klasse.
 	 * Hier wird eine Verbindung zur Datenbank aufgebaut, falls noch nicht vorhanden die benötigten Tabellen erstellt.
 	 */
 	public Datenbankzugriff() {
@@ -65,31 +65,29 @@ public class Datenbankzugriff {
 		}
 	}
 	
-	
+	/**
+	 * Fragt vom Server die Kontaktliste des übergebenen Benutzers ab
+	 * @param benutzer Der Benutzer von den die Kontaktliste geladen werden soll
+	 * @return Die Kontaktliste
+	 */
 	public ResultSet get_kontaktliste(String benutzer){
 		
+		ResultSet rueckgabewert = null;
 		try{
-			String query = "select"
-					+ "		k.benutzername,"
-					+ "		k.online,"
-					+ "		k.statusnachricht,"
-					+ "		k.statussymbol"
-					+ "from"
-					+ "		kontaktliste "
-					+ "			inner join benutzer as k on k.bNr = kontaktliste.kontakt"
-					+ "			inner join benutzer as b on b.Bnr = kontaktliste.besitzer"
-					+ "where"
-					+ "		b.benutzername = ?";
+			String query = "select  k.benutzername, k.online, k.statusnachricht, k.statussymbol "
+					+ "from "
+					+ "kontaktliste, benutzer AS k, benutzer AS b "
+					+ "where b.benutzername = ? and b.bNr = kontaktliste.besitzer and k.bNr = kontaktliste.kontakt;";
 			
 			PreparedStatement anweisung = con.prepareStatement(query);
-			anweisung.setString(1, benutzer);			
+			anweisung.setString(1, benutzer);
+			rueckgabewert = anweisung.executeQuery();
 			
 		} catch (SQLException e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(1);
 		}
-		
-		return null;
+		return rueckgabewert;
 	}
 	
 	/**

@@ -11,6 +11,7 @@ public class ClientMain {
 		try {
 			Socket client = new Socket("127.0.0.1", 12345);
 			PrintStream anfragen = new PrintStream(client.getOutputStream());
+			anfragen.println("get-kontaktlist#§xdagox");
 			anfragen.println("quit");
 			
 			
