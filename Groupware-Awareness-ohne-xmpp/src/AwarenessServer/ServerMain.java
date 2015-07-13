@@ -10,9 +10,7 @@ import java.net.Socket;
  *
  */
 public class ServerMain {
-
-	
-	
+		
 	/**
 	 * Programmeinstiegspunkt
 	 * @param args Parameter für den Port
@@ -56,6 +54,9 @@ public class ServerMain {
 			//wartet, bis ein Client die Verbindung zum Server aufbaut
 			while(true){
 				Socket sitzung = server.accept();
+				
+				//eröffnet einen Thread, der die Sitzung abarbeitet
+				new ServerSitzung(sitzung);
 			}
 			
 		} catch (IOException e) {
