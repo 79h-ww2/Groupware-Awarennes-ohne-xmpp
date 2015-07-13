@@ -1,5 +1,9 @@
 package AwarenessServer;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 /**
  * Ein TCP-Server, der den Clients eine Kontaktliste mit Awareness-Informationen zur Verfügung stellt.
  * @author Benedikt Brüntrup
@@ -7,11 +11,11 @@ package AwarenessServer;
  */
 public class ServerMain {
 
-	private int port;
+	
 	
 	/**
 	 * Programmeinstiegspunkt
-	 * @param args
+	 * @param args Parameter für den Port
 	 */
 	public static void main(String[] args) {
 			
@@ -36,7 +40,7 @@ public class ServerMain {
 			}
 			//wird aufgerufen, wenn der Port kein Zahlenwert ist
 			catch(NumberFormatException e){
-				System.out.println("Bitte übergeben Sie als Parameter einen Port.");
+				System.out.println("Bitte übergeben Sie einen Zahlenwert als Port.");
 			}
 		}
 	}
@@ -45,7 +49,18 @@ public class ServerMain {
 	 * Konstruktor der ServerMain-Klasse
 	 */
 	public ServerMain(int port){
-		
+		try {
+			//Der TCP-Server lauscht auf eine Anfrage eines Clients auf den übergebenen Port
+			ServerSocket server = new ServerSocket(port);
+			
+			//wartet, bis ein Client die Verbindung zum Server aufbaut
+			while(true){
+				Socket sitzung = server.accept();
+			}
+			
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 }
