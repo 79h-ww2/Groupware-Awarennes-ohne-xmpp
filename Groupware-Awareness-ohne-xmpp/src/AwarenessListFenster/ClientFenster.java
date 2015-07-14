@@ -19,9 +19,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 
-public class ClientFenster  extends JFrame{
+
+public abstract class ClientFenster  extends JFrame{
 
 	protected JTextField txtStatusnachricht;
 	protected JComboBox<JLabel> comStatusSymbol;
@@ -30,12 +31,27 @@ public class ClientFenster  extends JFrame{
 	protected Vector<AwarenessListZeile> werteAwarenessListe;
 	protected JMenu kontakteMenu;
 	protected JMenuItem kontaktHinzufuegen;
+	protected DialogLogin login;
 	
 	/**
 	 * Konstruktor
 	 */
 	public ClientFenster(String Fenstertitel){
-		super(Fenstertitel);	
+		super(Fenstertitel);
+		
+		//Bei Windows wird das Design in den Betriebsystem eigenen Design angezeigt
+		try {
+			if( System.getProperty("os.name").startsWith("Windows")){
+				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			}
+		} catch (Exception e) {
+			
+		} 
+		
+		
+		//zeigt zunächst das Login-Fesnter an
+		login = new DialogLogin(this);
+		
 		//designen des Fensters
 		
 		//Fensterabmaße angeben
@@ -108,7 +124,6 @@ public class ClientFenster  extends JFrame{
 		comStatusSymbol = new JComboBox<>(comboEintraegeStatus);
 		panelBereichAwarenessSetzung.add(comStatusSymbol,BorderLayout.SOUTH);
 		comStatusSymbol.setRenderer(new LayoutZeileComboBox<JLabel>());
-		comStatusSymbol.addItemListener(new StatusSymbolListerner());
 		comStatusSymbol.setVisible(true);
 		
 		werteAwarenessListe = new Vector<>();
