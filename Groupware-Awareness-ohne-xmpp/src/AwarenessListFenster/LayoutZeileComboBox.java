@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -17,12 +18,13 @@ import javax.swing.UIManager;
  *
  * @param <E>
  */
-public class ZeileComboBox<E> extends JPanel implements ListCellRenderer<E>{
+public class LayoutZeileComboBox<E> extends JPanel implements ListCellRenderer<E>{
 	
 	private JLabel lblIcon, lblText;
 	
-	public ZeileComboBox() {
+	public LayoutZeileComboBox() {
 		setLayout(new BorderLayout(10,10));
+		setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
 		lblIcon = new JLabel();
 		lblText = new JLabel();
 	}
@@ -45,7 +47,7 @@ public class ZeileComboBox<E> extends JPanel implements ListCellRenderer<E>{
 			setBackground(new Color(137, 179, 200));
 		}else
 		{
-			setBackground(UIManager.getColor("List.background"));
+			setBackground(UIManager.getColor("ComboBox.background"));
 		}
 		
 		

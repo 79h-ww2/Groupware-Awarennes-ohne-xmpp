@@ -3,25 +3,33 @@ package AwarenessListFenster;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
 
 public class ClientFenster  extends JFrame{
 
-	private JTextField txtStatusnachricht;
-	private JComboBox<JLabel> comStatusSymbol;
+	protected JTextField txtStatusnachricht;
+	protected JComboBox<JLabel> comStatusSymbol;
+	protected JScrollPane scrollLeistenAwarenessListen;
+	protected JList<AwarenessListZeile> awarenessListe;
+	protected Vector<AwarenessListZeile> werteAwarenessListe;
+	protected JMenu kontakteMenu;
+	protected JMenuItem kontaktHinzufuegen;
 	
 	/**
 	 * Konstruktor
@@ -36,9 +44,20 @@ public class ClientFenster  extends JFrame{
 		//Festlegen, dass beim Schließen des Fensters das Programm beendet werden soll
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		//Menü-Leiste hinzufügen
+		setJMenuBar(new JMenuBar());
+		kontakteMenu = new JMenu("Kontakte");
+		getJMenuBar().add(kontakteMenu);
+		kontakteMenu.setVisible(true);
+		getJMenuBar().setVisible(true);
+		kontaktHinzufuegen = new JMenuItem("Kontakt hinzufügen");
+		kontakteMenu.add(kontaktHinzufuegen);
+		kontaktHinzufuegen.setVisible(true);
+		
+		
 		JPanel cont = new JPanel();
 		add(cont);
-		cont.setLayout(new BorderLayout());
+		cont.setLayout(new BorderLayout(5,5));
 		cont.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		
 		//Bereich, wo der Benutzer seine Awareness auswählen kann
@@ -67,17 +86,16 @@ public class ClientFenster  extends JFrame{
 			//bestimmt die Adresse des Icons
 			String adresseIcon = System.getProperty("user.dir") + "/bilder/" + zeileIcons[i];
 			
-			//System.out.println(adresseIcon.getPath());
 			JLabel tempLabel = new JLabel();
 			
 			//lädt das Icon in die Combobox-Zeile
 			try{
 				File f = new File(adresseIcon);
-				System.out.println(f.getAbsolutePath());
 				ImageIcon icon = new ImageIcon(ImageIO.read(f));
 				tempLabel.setIcon(icon);
 			}catch (IOException e) {
 				System.out.println(e);
+				JOptionPane.showMessageDialog(this, e.getMessage());
 			}
 			//fügt zur Combobox-Zeile einen Text hinzu
 			tempLabel.setText(zeileBeschriftung[i]);
@@ -89,8 +107,20 @@ public class ClientFenster  extends JFrame{
 		//ComboBox, wo das Statussymbol ausgewählt wird
 		comStatusSymbol = new JComboBox<>(comboEintraegeStatus);
 		panelBereichAwarenessSetzung.add(comStatusSymbol,BorderLayout.SOUTH);
-		comStatusSymbol.setRenderer(new ZeileComboBox<JLabel>());
+		comStatusSymbol.setRenderer(new LayoutZeileComboBox<JLabel>());
+		comStatusSymbol.addItemListener(new StatusSymbolListerner());
 		comStatusSymbol.setVisible(true);
+		
+		werteAwarenessListe = new Vector<>();
+		werteAwarenessListe.add(new AwarenessListZeile("Hugo", "Wütend", new ImageIcon(System.getProperty("user.dir") + "/bilder/" + zeileIcons[1]),false));
+		werteAwarenessListe.add(new AwarenessListZeile("Susi", "Müde", new ImageIcon(System.getProperty("user.dir") + "/bilder/" + zeileIcons[3]),true));
+		
+		//ListBox erstellen, wo die Awareness-Informationen angezeigt werden
+		awarenessListe = new JList<>(werteAwarenessListe);
+		awarenessListe.setCellRenderer(new LayoutZeileAwarenessList<AwarenessListZeile>());
+		scrollLeistenAwarenessListen = new JScrollPane(awarenessListe);
+		scrollLeistenAwarenessListen.setVisible(true);
+		cont.add(scrollLeistenAwarenessListen, BorderLayout.CENTER);
 		
 		
 		
@@ -98,5 +128,5 @@ public class ClientFenster  extends JFrame{
 		cont.setVisible(true);
 		setVisible(true);
 	}
-
+	
 }

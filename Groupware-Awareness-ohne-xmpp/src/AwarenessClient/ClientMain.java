@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.swing.JOptionPane;
+
 import AwarenessListFenster.ClientFenster;
 
 
@@ -32,53 +34,25 @@ public class ClientMain extends ClientFenster{
 		try {
 			Socket client = new Socket("127.0.0.1", 12345);
 			PrintStream anfragen = new PrintStream(client.getOutputStream());
+			Scanner antwort = new Scanner(client.getInputStream());
 			
-			
+			//nimmt die Kontaktliste vom Server entgegen
 			anfragen.println("get-kontaktlist#§xdagox");
-			//nimmt die Zeilen vom Server entgegen
-			ArrayList<String> zeilen = clientFenster.antwortVomServerEntgegennehmen(client.getInputStream());
-			for(String zeile : zeilen){
-				System.out.println(zeile);
-			}
-						
+			if (antwort.hasNextLine()){
+				String wert = "";
+				do{
+					wert = antwort.nextLine();
+				}while(wert.equals("§Ende§") == false);
+			}	
 			anfragen.println("quit");
 			
 			
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(clientFenster, e.getMessage());
 		}
 	}
 	
-	/**
-	 * nimmt die Antworten des Server entgegen
-	 * @param in InputStream des Servers
-	 * @return Die Antworten des Servers in einer Arraylist
-	 */
-	public ArrayList<String> antwortVomServerEntgegennehmen(InputStream in){
-		Scanner serverAntworten = new Scanner(in);
-		ArrayList<String> zeilenServerAntwort = new ArrayList<>();
-		try {
-			//Überprüft solange, bis der Server die Anweisung "§Ende§" sendet, ob der Server etwas sendet
-			String wert = "";
-			do{
-				Thread.sleep(1000);
-				
-				//schreibt die übergebenen Zeilen in eine ArrayList
-				while(serverAntworten.hasNext() && !verbindungGeschlossen){
-					wert = serverAntworten.nextLine();
-					zeilenServerAntwort.add(wert);
-				}
-			}while(wert.equals("§Ende§") == false && !verbindungGeschlossen );
-		} catch (InterruptedException e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-		}
-		
-		//gibt die ArrayList aus
-		return zeilenServerAntwort;
-	}
+	
 	
 }
