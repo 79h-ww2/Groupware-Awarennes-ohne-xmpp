@@ -64,11 +64,10 @@ public class ServerSitzung implements Runnable{
 						//überprüft aus den ersten Feld den Typ der Anfrage
 						String feld1 = arrClientAnfrage[0];
 						
-						
 						/*
 						 * Anfrage zur Verbindungsschließung
 						 */
-						if (feld1.equals("quit")){
+						if (feld1.equals("quit") || sitzung.isClosed()){
 							quit = true;
 						}
 						
@@ -82,8 +81,22 @@ public class ServerSitzung implements Runnable{
 						/*
 						 * Anfrage zum Hinzufügen eines neuen Benutzers
 						 */
-						if (feld1.equals("set-neuer-benutzer")){
+						else if (feld1.equals("set-neuer-benutzer")){
 							benutzerHinzufuegen(arrClientAnfrage[1], arrClientAnfrage[2], serverAntwort);
+						}
+						
+						/*
+						 * überprüft die Login-Daten
+						 */
+						else if (feld1.equals("check-login")){
+							ueberprüfeLoginDaten(arrClientAnfrage[1], arrClientAnfrage[2], serverAntwort);
+						}
+						
+						/*
+						 * fügt einen Benutzer zur Kontaktliste hinzu
+						 */
+						else if (feld1.equals("add-kontakt")){
+							kontaktZurKontaklisteHinzufuegen(arrClientAnfrage[1], arrClientAnfrage[2], serverAntwort);
 						}
 					}
 				}
@@ -136,6 +149,7 @@ public class ServerSitzung implements Runnable{
 	 * Fügt einen Benutzer zur Datenbank hinzu und überprüft vorher, ob er nicht schon existiert
 	 * @param benutzername Benutzername des neuen Benutzers
 	 * @param passwort Passwort des neuen Benutzers
+	 * @param ausgabeServer Ausgabe-Stream des Server zum Client
 	 */
 	public void benutzerHinzufuegen(String benutzername, String passwort, PrintStream ausgabeServer){
 		Datenbankzugriff dbZugriff = new Datenbankzugriff();
@@ -165,5 +179,51 @@ public class ServerSitzung implements Runnable{
 		//trennt die Datenbankverbindung
 		dbZugriff.verbindungSchliessen();
 	}
-
+	
+	/**
+	 * Überprüft die Login-Daten und gibt die ID des Benutzers aus, wenn sie gültig sind.
+	 * Sonst wird -1 ausgegeben
+	 * @param benutzer Der übergebene Benutzername
+	 * @param passwort Das übergeben Passwort
+	 * @param ausgabeServer Ausgabe-Stream des Server zum Client
+	 */
+	public void ueberprüfeLoginDaten(String benutzer, String passwort, PrintStream ausgabeServer){
+		Datenbankzugriff dbZugriff = new Datenbankzugriff();
+		//übermittelt die bestimmte Benutzer-ID
+		int wert = dbZugriff.loginCheck(benutzer, passwort);
+		ausgabeServer.println(wert);
+		ausgabeServer.println("§Ende§"); //Nachrichten Ende wird übertragen
+		
+		if ( wert != -1) System.out.printf ("Der Client %s hat sich erfolgreich angemeldet.%n", sitzung.getInetAddress().getHostAddress());
+		
+		//trennt die Datenbankverbindung
+		dbZugriff.verbindungSchliessen();
+	}
+	
+	/**
+	 * fügt einen Kontakt zur Kontaktliste hinzu
+	 * @param besitzer Besitzer der kontaktliste
+	 * @param kontakt Kontakt, der hinzugefügt werden soll
+	 * @param ausgabeServer Ausgabe-Stream des Server zum Client
+	 */
+	public void kontaktZurKontaklisteHinzufuegen(String besitzer, String kontakt, PrintStream ausgabeServer){
+		Datenbankzugriff dbZugriff = new Datenbankzugriff();
+		
+		//überprüft, ob der Kontakt exisiert
+		if (dbZugriff.bestimmeBNrBenutzer(kontakt) != -1){
+			//fügt den Kontakt zur Kontaktliste hinzu
+			dbZugriff.kontaktZurKontaktListeHinzufuegen(besitzer, kontakt);
+			ausgabeServer.println("ok"); //Hinzufügen wurde bestätigt
+			ausgabeServer.println("§Ende§"); //Nachrichten Ende wird übertragen
+		}
+		//wenn der Kontakt nicht exisiert
+		else{
+			//Eine Fehlermeldung wird an den Client gesendet
+			ausgabeServer.println("Kontakt exisiert nicht");
+			ausgabeServer.println("§Ende§"); //Nachrichten Ende wird übertragen
+		}
+			
+		//trennt die Datenbankverbindung
+		dbZugriff.verbindungSchliessen();
+	}
 }

@@ -148,5 +148,57 @@ public class Datenbankzugriff {
 		} catch (SQLException e) {
 		}
 	}
+	
+	/**
+	 * Überprüft die Login-Daten und gibt, wenn sie richtig sind die ID des Benutzers aus
+	 * @param benutzername Der übergebene Benutzername
+	 * @param passwort Das übergebene Passwort
+	 * @return Die bestimmte Benutzer ID
+	 */
+	public int loginCheck (String benutzername, String passwort){
+		int id = -1;
+		ResultSet rueckgabewert = null;
+		try{
+			//sendet eine Datenbnankabfrage zur Ermittelung, ob es den Benutzer schon gibt
+			String query ="select bNr from benutzer where benutzername = ? and passwort = ?";
+			PreparedStatement anweisung = con.prepareStatement(query);
+			anweisung.setString(1, benutzername);
+			anweisung.setString(2, passwort);
+			rueckgabewert = anweisung.executeQuery();
+			
+			//werdet den Rückgabewert aus
+			while(rueckgabewert.next()){
+				id = rueckgabewert.getInt(1);
+			}
+				
+		} catch (SQLException e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(1);
+		}
+		return id;
+	}
+	
+	/**
+	 * fügt einen neuen Kontakt zur Kontaktliste hinzu
+	 * @param besitzer Der Besitzer der Kontaktliste
+	 * @param kontakt Der Kontakt, der hinzugefügt werden soll
+	 */
+	public void kontaktZurKontaktListeHinzufuegen(String besitzer, String kontakt){
+		int kNr = bestimmeBNrBenutzer(kontakt);
+		int bNr = bestimmeBNrBenutzer(besitzer);
+
+		try{
+			String query ="insert into kontaktliste (besitzer, kontakt) values(?, ?);";
+			PreparedStatement anweisung = con.prepareStatement(query);
+			
+			anweisung.setInt(1, bNr);
+			anweisung.setInt(2, kNr);
+	
+			anweisung.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(1);
+		}
+	}
 
 }

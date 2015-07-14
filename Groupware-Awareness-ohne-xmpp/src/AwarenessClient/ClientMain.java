@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.security.auth.login.LoginContext;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -62,6 +63,9 @@ public class ClientMain extends ClientFenster{
 		
 		//Listener, die einen Button-Klick beim Loginfenster entgegennehmen
 		login.addActionListenerButtons(new buttonKlickListener());
+		
+		//Listener, der darauf lauscht, ob beim Menü ausgewählt wurde, dass eine neuer Kontakt zur Kontaktliste hinzugefügt werden soll
+		kontaktHinzufuegen.addActionListener(new buttonKlickListener());
 	}
 		
 
@@ -95,16 +99,16 @@ public class ClientMain extends ClientFenster{
 	 * @author Benedikt Brüntrup
 	 */
 	private class fensterSchliessenListener extends WindowAdapter{
-		public void windowClosed(WindowEvent e) {
-			super.windowClosed(e);
-			
-				try {
-					anfragen.println("quit");
-					anfragen.close();
-					antwort.close();
-					client.close();
-				} catch (Exception e1) {
-				}
+
+		public void windowClosing(WindowEvent e) {
+			super.windowClosing(e);
+			try {
+				anfragen.println("quit");
+				anfragen.close();
+				antwort.close();
+				client.close();
+			} catch (Exception e1) {
+			}
 		}
 	}
 	
@@ -134,12 +138,35 @@ public class ClientMain extends ClientFenster{
 					JOptionPane.showMessageDialog(null, "Der Benutzername ist schon bereits belegt", "Benutzeranlegen fehlgeschlagen", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
+			
+			/*
+			 * Benutzer hat den Login-Button geklickt, um sich anzumelden
+			 */
 			else if (e.getActionCommand().equals("Login")){
 				
-				//Kennzeichnet, dass das Login-Dialog mit einen Button geschlossen wurde
-				login.setGeschlossendurchButton(true);
-				login.dispose(); //Schließt das Anmeldedialog
-				setVisible(true); //zeigt das Awareness-Dialog an
+				if (loginCheck(login.getBenutzername(), login.getPasswort()) != -1){
+					//wenn die Login-Daten richtig waren
+					
+					//Kennzeichnet, dass das Login-Dialog mit einen Button geschlossen wurde
+					login.setGeschlossendurchButton(true);
+					login.dispose(); //Schließt das Anmeldedialog
+					setVisible(true); //zeigt das Awareness-Dialog an
+				}
+				//Fehlermeldung, wenn die Login-Daten falsch waren
+				else{
+					JOptionPane.showMessageDialog(null, "Die Login-Daten sind falsch. Bitte versuchen Sie es nocheinmal", "Login fehlgeschlagen", JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+			
+			/*
+			 * Benutzer möchte einen neuen Kontakt zur Kontaktliste hinzufügen
+			 */
+			else if (e.getActionCommand().equals("Kontakt hinzufügen")){
+				if (kontaktZurKontaktlisteHinzufuegen()){
+					JOptionPane.showMessageDialog(null, "Der Kontakt wurde erfolgreich zur Kontaktliste hinzugefügt.", "Hinzufügen erfolgreich", JOptionPane.INFORMATION_MESSAGE);
+				}else{
+					JOptionPane.showMessageDialog(null, "Der kontakt exisiert nicht.", "Hinzufügen Fehlgeschlagen", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 		
@@ -176,6 +203,72 @@ public class ClientMain extends ClientFenster{
 							
 		} catch (NoSuchAlgorithmException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
+		}
+		
+		return server_antwort_text.equals("ok");
+	}
+	
+	/**
+	 * überprüft die Logindaten und wenn sie richtig sind die Id des Benutzers aus
+	 * @param benutzername Der eingegeben Benutzername
+	 * @param passwort Das eingegeben Passwort
+	 * @return Die ID des Benutzers, bei falscher Eingabe -1
+	 */
+	public int loginCheck(String benutzername, char[] passwort){
+		//#§ ist das Trennzeichen zwischen den Parametern
+				String server_antwort_text = "";
+				try {
+					//Verschlüsseln des Passworts durch ein MD5-Hash
+					MessageDigest md5 = MessageDigest.getInstance("MD5");
+					String passwort_verschluesselt =  new String(md5.digest(String.valueOf(passwort).getBytes()));
+					
+					//erstellt die Serveranfrage
+					String anfrage_text = "check-login#§" + benutzername +"#§" + passwort_verschluesselt;
+					
+					//sendet die Anfrage an den Server
+					anfragen.println(anfrage_text);
+					
+					//nimmt die Serverantwort entgegen
+					if (antwort.hasNextLine()){
+						String wert = "";
+						do{
+							wert = antwort.nextLine();
+							if (wert.equals("§Ende§") == false) server_antwort_text = wert;
+						}while(wert.equals("§Ende§") == false);
+					}
+									
+				} catch (NoSuchAlgorithmException e) {
+					JOptionPane.showMessageDialog(this, e.getMessage());
+				}
+				
+				int id = Integer.valueOf(server_antwort_text);
+				return id;
+	}
+	
+	/**
+	 * Zeigt ein Input-Feld an, womit der Benutzer einen neuen Kontakt zur Kontaktliste hinzufügen kann.
+	 * Sendet, die Hinzufügeanfrage an den Server
+	 * @return Gibt aus, opb das Hinzufügen erfolgreich war
+	 */
+	public boolean kontaktZurKontaktlisteHinzufuegen(){
+		String benutzer = login.getBenutzername();
+		String kontakt = JOptionPane.showInputDialog(this, "Bitte geben Sie den Kontaktnamen ein, der zur Kontaktliste hinzugefügt werden soll.");
+		
+		String server_antwort_text = "";
+		
+		//erstellt die Serveranfrage
+		String anfrage_text = "add-kontakt#§" + benutzer +"#§" + kontakt;
+		
+		//sendet die Anfrage an den Server
+		anfragen.println(anfrage_text);
+		
+		//nimmt die Serverantwort entgegen
+		if (antwort.hasNextLine()){
+			String wert = "";
+			do{
+				wert = antwort.nextLine();
+				if (wert.equals("§Ende§") == false) server_antwort_text = wert;
+			}while(wert.equals("§Ende§") == false);
 		}
 		
 		return server_antwort_text.equals("ok");
