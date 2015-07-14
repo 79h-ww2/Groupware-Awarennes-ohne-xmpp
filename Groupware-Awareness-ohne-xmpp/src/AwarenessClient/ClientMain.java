@@ -22,6 +22,8 @@ import javax.security.auth.login.LoginContext;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import AwarenessListFenster.AwarenessListZeile;
 import AwarenessListFenster.ClientFenster;
@@ -76,6 +78,9 @@ public class ClientMain extends ClientFenster{
 		
 		//Listener, der darauf lauscht, ob beim Menü ausgewählt wurde, dass eine neuer Kontakt zur Kontaktliste hinzugefügt werden soll
 		kontaktHinzufuegen.addActionListener(new buttonKlickListener());
+		
+		//Listener, der auf eine Änderung im Statustextfeld lauscht
+		txtStatusnachricht.getDocument().addDocumentListener(new StatusTextAenderungListener());
 	}
 		
 
@@ -85,6 +90,32 @@ public class ClientMain extends ClientFenster{
 	 */
 	public static void main(String[] args) {
 		ClientMain clientFenster = new ClientMain();
+	}
+	
+	/**
+	 * Listener, der die Änderung der Statusnachricht an den Server überträgt
+	 * @author Benedikt Brüntrup
+	 *
+	 */
+	private class StatusTextAenderungListener implements DocumentListener{
+
+		public void insertUpdate(DocumentEvent e) {
+			textAenderung(e);;	
+		}
+
+		public void removeUpdate(DocumentEvent e) {
+			textAenderung(e);
+		}
+
+		public void changedUpdate(DocumentEvent e) {
+			textAenderung(e);	
+		}
+		
+		public void textAenderung(DocumentEvent e){
+			String text = txtStatusnachricht.getText().equals("") ? "null" : txtStatusnachricht.getText();
+			anfragen.println("set-statusnachricht#§" + login.getBenutzername() +"#§" + text );
+		}
+		
 	}
 	
 	/**
@@ -173,6 +204,30 @@ public class ClientMain extends ClientFenster{
 					login.setGeschlossendurchButton(true);
 					login.dispose(); //Schließt das Anmeldedialog
 					setVisible(true); //zeigt das Awareness-Dialog an
+					
+					//empfängt vom Server die aktuelle Stautsnachricht
+					
+					//wartet, bis die Leitung frei ist
+					while(serverLock && !verbindungGeschlossen);
+					
+					//empfängt vom Server die aktuelle Stautsnachricht
+					serverLock = true;
+					anfragen.println("get-statusnachricht#§" + login.getBenutzername());
+					String server_antwort_text = "";
+					//nimmt die Serverantwort entgegen
+					if (antwort.hasNextLine()){
+						String wert = "";
+						do{
+							wert = antwort.nextLine();
+							if (wert.equals("§Ende§") == false) server_antwort_text = wert;
+						}while(wert.equals("§Ende§") == false);
+					}
+					serverLock = false;
+					
+					//zeigt die Statusnachricht im Textfeld an
+					server_antwort_text = server_antwort_text.equals("null") ? "" : server_antwort_text;
+					txtStatusnachricht.setText(server_antwort_text);
+					
 					
 					//startet einen Thread, der die Kontaktliste durchgehend lädt
 					new AwarenessCheck();

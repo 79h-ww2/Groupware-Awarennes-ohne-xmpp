@@ -236,18 +236,89 @@ public class Datenbankzugriff {
 	public void aendereOnlineStatus(String benutzer, boolean online){
 
 		try{
-			String query ="update benutzer set online = ?, status_aktuell_seit = ? where benutzername = ?";
+			String query ="update benutzer set online = ?, status_aktuell_seit = ?, statussymbol = ? where benutzername = ?";
 			PreparedStatement anweisung = con.prepareStatement(query);
 			
 			anweisung.setBoolean(1, online);
 			anweisung.setLong(2, System.currentTimeMillis());
-			anweisung.setString(3, benutzer);
+			anweisung.setString(3, "chat");
+			anweisung.setString(4, benutzer);
 	
 			anweisung.executeUpdate();
 		} catch (SQLException e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(1);
 		}
+	}
+	
+	/**
+	 * Änder das Status-Symbol des Benutzers
+	 * @param benutzer Der Benutzer
+	 * @param symbol Das neue Statussymbol
+	 */
+	public void aendereStatusSymbol(String benutzer, String symbol){
+
+		try{
+			String query ="update benutzer set status_aktuell_seit = ?, statussymbol = ? where benutzername = ?";
+			PreparedStatement anweisung = con.prepareStatement(query);
+			
+			anweisung.setLong(1, System.currentTimeMillis());
+			anweisung.setString(2, symbol);
+			anweisung.setString(3, benutzer);
+			anweisung.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(1);
+		}
+	}
+	
+	/**
+	 * Änder die Statusnachricht des Benutzers
+	 * @param benutzer Der Benutzer
+	 * @param nachricht Die neue Statusnachricht
+	 */
+	public void aendereStatusnachricht(String benutzer, String nachricht){
+
+		try{
+			String query ="update benutzer set status_aktuell_seit = ?, statusnachricht = ? where benutzername = ?";
+			PreparedStatement anweisung = con.prepareStatement(query);
+			
+			anweisung.setLong(1, System.currentTimeMillis());
+			anweisung.setString(2, nachricht);
+			anweisung.setString(3, benutzer);
+			anweisung.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(1);
+		}
+	}
+	
+	/**
+	 * Lädt die Statusnachricht des Benutzers
+	 * @param benutzer Der Benutzer
+	 * @param nachricht Die neue Statusnachricht
+	 */
+	public String getStatusnachricht(String benutzer){
+
+		String status = "";
+		ResultSet rueckgabewert = null;
+		try{
+			String query ="select statusnachricht from benutzer where benutzername = ?";
+			PreparedStatement anweisung = con.prepareStatement(query);
+			
+			anweisung.setString(1, benutzer);
+			rueckgabewert = anweisung.executeQuery();
+			
+			//werdet den Rückgabewert aus
+			while(rueckgabewert.next()){
+				status = rueckgabewert.getString(1);
+			}
+		} catch (SQLException e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(1);
+		}
+		
+		return status;
 	}
 
 }

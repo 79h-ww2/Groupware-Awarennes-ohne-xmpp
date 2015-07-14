@@ -106,6 +106,34 @@ public class ServerSitzung implements Runnable{
 						else if (feld1.equals("add-kontakt")){
 							kontaktZurKontaklisteHinzufuegen(arrClientAnfrage[1], arrClientAnfrage[2], serverAntwort);
 						}
+						
+						/*
+						 * lädt vom Client das aktuelle Status-Symbol
+						 */
+						else if (feld1.equals("set-symbol")){
+							Datenbankzugriff dbZugriff = new Datenbankzugriff();
+							dbZugriff.aendereStatusSymbol(arrClientAnfrage[1], arrClientAnfrage[2]);
+							dbZugriff.verbindungSchliessen();
+						}
+						
+						/*
+						 * lädt vom Client die aktuelle Statusnachricht
+						 */
+						else if (feld1.equals("set-statusnachricht")){
+							Datenbankzugriff dbZugriff = new Datenbankzugriff();
+							dbZugriff.aendereStatusnachricht(arrClientAnfrage[1], arrClientAnfrage[2]);
+							dbZugriff.verbindungSchliessen();
+						}
+						
+						/*
+						 * sendet an den Client die aktuelle Statusnachricht
+						 */
+						else if (feld1.equals("get-statusnachricht")){
+							Datenbankzugriff dbZugriff = new Datenbankzugriff();
+							serverAntwort.println(dbZugriff.getStatusnachricht(arrClientAnfrage[1]));
+							dbZugriff.verbindungSchliessen();
+							serverAntwort.println("§Ende§");
+						}
 					}
 				}
 			}while(!quit);
@@ -240,7 +268,7 @@ public class ServerSitzung implements Runnable{
 		Datenbankzugriff dbZugriff = new Datenbankzugriff();
 		
 		//überprüft, ob der Kontakt exisiert
-		if (dbZugriff.bestimmeBNrBenutzer(kontakt) != -1){
+		if (dbZugriff.bestimmeBNrBenutzer(kontakt) != -1 && kontakt.equals(besitzer) == false){
 			//fügt den Kontakt zur Kontaktliste hinzu
 			dbZugriff.kontaktZurKontaktListeHinzufuegen(besitzer, kontakt);
 			ausgabeServer.println("ok"); //Hinzufügen wurde bestätigt
