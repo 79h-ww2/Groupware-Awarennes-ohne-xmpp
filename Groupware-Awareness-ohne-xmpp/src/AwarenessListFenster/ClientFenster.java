@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import java.awt.Dialog;
 
 
 public abstract class ClientFenster  extends JFrame{
@@ -47,10 +48,6 @@ public abstract class ClientFenster  extends JFrame{
 		} catch (Exception e) {
 			
 		} 
-		
-		
-		//zeigt zunächst das Login-Fesnter an
-		login = new DialogLogin(this);
 		
 		//designen des Fensters
 		
@@ -141,7 +138,23 @@ public abstract class ClientFenster  extends JFrame{
 		
 		//Fenster anzeigen
 		cont.setVisible(true);
-		setVisible(true);
+		setFensterAktiviert(false);
+		
+		//zeigt zunächst das Login-Fesnter an
+		login = new DialogLogin(this,Dialog.ModalityType.MODELESS);
+		setFensterAktiviert(true);
+		
+	}
+	
+	/**
+	 * legt fest, ob das Fenster aktiviert sein soll
+	 * @param aktiviert
+	 */
+	public void setFensterAktiviert(boolean aktiviert){
+		comStatusSymbol.setEnabled(aktiviert);
+		txtStatusnachricht.setEnabled(aktiviert);
+		getJMenuBar().setEnabled(aktiviert);
+		awarenessListe.setEnabled(aktiviert);
 	}
 	
 }

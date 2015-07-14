@@ -3,6 +3,7 @@ package AwarenessListFenster;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -27,9 +28,11 @@ public class DialogLogin extends JDialog {
 	protected JPasswordField txtPasswort;
 	protected JButton btnAbbrechen, btnLogin, btnRegistieren;
 	private boolean geschlossendurchButton;
+	private Window eltern;
 	
-	public DialogLogin(Window parent){
-		super(parent,"Login");
+	public DialogLogin(Window parent, ModalityType m){
+		super(parent,"Login",m);
+		eltern = parent;
 		
 		geschlossendurchButton = false;
 		
@@ -60,6 +63,15 @@ public class DialogLogin extends JDialog {
 		panelButtonBereich.add(btnRegistieren = new JButton("Registrieren"));
 		panelButtonBereich.add(btnAbbrechen = new JButton("Abbrechen"));
 		panelButtonBereich.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+		
+		//Listener der beim Klick des Abbrechenbuttons ausgelöst wird
+		btnAbbrechen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//schließt das Programm
+				setGeschlossendurchButton(false);
+				dispose();
+			}
+		});
 				
 		
 		panelBeschriftung.setVisible(true);
@@ -77,7 +89,6 @@ public class DialogLogin extends JDialog {
 	 */
 	public void addActionListenerButtons(ActionListener l){
 		btnLogin.addActionListener(l);
-		btnAbbrechen.addActionListener(l);
 		btnRegistieren.addActionListener(l);
 	}
 	
@@ -92,8 +103,35 @@ public class DialogLogin extends JDialog {
 			super.windowClosed(e);
 			
 			//Wenn das Dialog mit dem Kreuz geschlossen wurde, wird das komplette Programm beendet
-			if (!geschlossendurchButton) System.exit(0);
+			if (!geschlossendurchButton) {
+				System.exit(0);
+			}
 		}
 		
+	}
+
+	public boolean isGeschlossendurchButton() {
+		return geschlossendurchButton;
+	}
+
+	public void setGeschlossendurchButton(boolean geschlossendurchButton) {
+		this.geschlossendurchButton = geschlossendurchButton;
 	};
+	
+	/**
+	 * Gibt den Benutzernamen aus
+	 * @return
+	 */
+	public String getBenutzername(){
+		return  txtBenutzername.getText();
+	}
+	
+	/**
+	 * Gibt das Passwort aus
+	 * @return
+	 */
+	public char[] getPasswort(){
+		return txtPasswort.getPassword();
+	}
+	
 }

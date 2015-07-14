@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -28,6 +30,9 @@ public class ClientMain extends ClientFenster{
 	private PrintStream anfragen;
 	private Scanner antwort;
 	
+	/**
+	 * Konstruktor des Clients
+	 */
 	public ClientMain(){
 		super("Awareness-Liste ohne XMPP");
 		
@@ -41,20 +46,11 @@ public class ClientMain extends ClientFenster{
 			anfragen = new PrintStream(client.getOutputStream());
 			antwort = new Scanner(client.getInputStream());
 			
-			//nimmt die Kontaktliste vom Server entgegen
-			anfragen.println("get-kontaktlist#§xdagox");
-			if (antwort.hasNextLine()){
-				String wert = "";
-				do{
-					wert = antwort.nextLine();
-				}while(wert.equals("§Ende§") == false);
-			}	
-			anfragen.println("quit");
-			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, e.getMessage());
+			System.exit(1);
 		}
 		
 		
@@ -101,14 +97,14 @@ public class ClientMain extends ClientFenster{
 	private class fensterSchliessenListener extends WindowAdapter{
 		public void windowClosed(WindowEvent e) {
 			super.windowClosed(e);
-			if (client.isClosed() == false){
+			
 				try {
+					anfragen.println("quit");
 					anfragen.close();
 					antwort.close();
 					client.close();
-				} catch (IOException e1) {
+				} catch (Exception e1) {
 				}
-			}
 		}
 	}
 	
@@ -118,10 +114,71 @@ public class ClientMain extends ClientFenster{
 	private class buttonKlickListener implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
-			System.out.println(e.getActionCommand());
+			
+			/*
+			 * Benutzer hat den Registieren-Button geklickt
+			 */
+			if(e.getActionCommand().equals("Registrieren")){
+				
+				//sendet zum Server eine Anfrage, zum Anlegen eines neuen Benutzers
+				if (neuenBenutzerAnlegen(login.getBenutzername(), login.getPasswort())){
+					//wenn das Anlegen erfolgreich war
+					
+					//Kennzeichnet, dass das Login-Dialog mit einen Button geschlossen wurde
+					login.setGeschlossendurchButton(true);
+					login.dispose(); //Schließt das Anmeldedialog
+					setVisible(true); //zeigt das Awareness-Dialog an
+				}
+				//wenn der Benutzer schon exisiterte
+				else{
+					JOptionPane.showMessageDialog(null, "Der Benutzername ist schon bereits belegt", "Benutzeranlegen fehlgeschlagen", JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+			else if (e.getActionCommand().equals("Login")){
+				
+				//Kennzeichnet, dass das Login-Dialog mit einen Button geschlossen wurde
+				login.setGeschlossendurchButton(true);
+				login.dispose(); //Schließt das Anmeldedialog
+				setVisible(true); //zeigt das Awareness-Dialog an
+			}
 		}
 		
 	}
 	
+	/**
+	 * Dieses Methode sendet eine Anfrage an den Server zum Anlegen eines neuen Benutzers
+	 * @param benutzer Benutzername
+	 * @param passwort Passowort
+	 */
+	public boolean neuenBenutzerAnlegen(String benutzer, char[] passwort){
+		
+		//#§ ist das Trennzeichen zwischen den Parametern
+		String server_antwort_text = "";
+		try {
+			//Verschlüsseln des Passworts durch ein MD5-Hash
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			String passwort_verschluesselt =  new String(md5.digest(String.valueOf(passwort).getBytes()));
+			
+			//erstellt die Serveranfrage
+			String anfrage_text = "set-neuer-benutzer#§" + benutzer +"#§" + passwort_verschluesselt;
+			
+			//sendet die Anfrage an den Server
+			anfragen.println(anfrage_text);
+			
+			//nimmt die Serverantwort entgegen
+			if (antwort.hasNextLine()){
+				String wert = "";
+				do{
+					wert = antwort.nextLine();
+					if (wert.equals("§Ende§") == false) server_antwort_text = wert;
+				}while(wert.equals("§Ende§") == false);
+			}
+							
+		} catch (NoSuchAlgorithmException e) {
+			JOptionPane.showMessageDialog(this, e.getMessage());
+		}
+		
+		return server_antwort_text.equals("ok");
+	}
 	
 }

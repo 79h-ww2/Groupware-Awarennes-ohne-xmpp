@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import org.sqlite.core.DB;
+
 /**
  * Bei dieser Klasse handelt es sich um einen Thread, der eröffnet wird, wenn der Client sich mit dem Server verbunden hat.
  * Über dieses Nebenprogramm werden die einzelnen Anfragen des Clients bearbeitet
@@ -63,17 +65,25 @@ public class ServerSitzung implements Runnable{
 						String feld1 = arrClientAnfrage[0];
 						
 						
-						//Client schließt Verbindung
+						/*
+						 * Anfrage zur Verbindungsschließung
+						 */
 						if (feld1.equals("quit")){
 							quit = true;
 						}
-						//Übertragen der Kontaktliste
+						
+						/*
+						 * Anfrage auf eine Kontaktliste
+						 */
 						else if(feld1.equals("get-kontaktlist")){
 							kontaktlisteSenden(serverAntwort, arrClientAnfrage);
 						}
-						//Einen Benutzer hinzufügen
+						
+						/*
+						 * Anfrage zum Hinzufügen eines neuen Benutzers
+						 */
 						if (feld1.equals("set-neuer-benutzer")){
-							
+							benutzerHinzufuegen(arrClientAnfrage[1], arrClientAnfrage[2], serverAntwort);
 						}
 					}
 				}
@@ -90,6 +100,7 @@ public class ServerSitzung implements Runnable{
 			System.out.printf("Die Verbindung zum Client %s wurde getrennt.%n", sitzung.getInetAddress().getHostAddress());
 		}
 	}
+		
 	
 	/**
 	 * Sendet die Kontaktliste an den Client
@@ -115,8 +126,44 @@ public class ServerSitzung implements Runnable{
 			ausgabeServer.println(kontaktliste_str);
 		}
 		
+		dbZugriff.verbindungSchliessen();
+		
 		//teilt den Client mit, dass die Kontaktliste zu Ende ist
 		ausgabeServer.println("§Ende§");
+	}
+	
+	/**
+	 * Fügt einen Benutzer zur Datenbank hinzu und überprüft vorher, ob er nicht schon existiert
+	 * @param benutzername Benutzername des neuen Benutzers
+	 * @param passwort Passwort des neuen Benutzers
+	 */
+	public void benutzerHinzufuegen(String benutzername, String passwort, PrintStream ausgabeServer){
+		Datenbankzugriff dbZugriff = new Datenbankzugriff();
+		
+		//Benutzer wird nur angelegt, wenn er noch nicht exiswitert
+		if(dbZugriff.bestimmeBNrBenutzer(benutzername) == -1){
+			
+			//Der Benutzer wird angelegt
+			dbZugriff.benutzerAnlegen(benutzername, passwort);
+			
+			//bestätigt das Anlegen des Benutzers
+			ausgabeServer.println("ok");
+			ausgabeServer.println("§Ende§"); //Nachrichten Ende wird übertragen	
+			
+			System.out.printf ("Der Client: %s hat einen neuen Benutzer angelegt.%n", sitzung.getInetAddress().getHostAddress());
+		}
+		
+		//wenn er schon existiert,wird der Client informatiert
+		else{
+			//informatiert den Client, dass der Benutzername schon belegt ist
+			ausgabeServer.println("schon vorhanden");
+			ausgabeServer.println("§Ende§"); //Nachrichten Ende wird übertragen
+			
+			System.out.printf ("Der Client: %s von Client genannt Benutzer, der angelegt werden soll, exisiert schon.%n", sitzung.getInetAddress().getHostAddress());
+		}
+		
+		//trennt die Datenbankverbindung
+		dbZugriff.verbindungSchliessen();
 	}
 
 }
