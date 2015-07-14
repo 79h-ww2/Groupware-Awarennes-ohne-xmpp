@@ -63,6 +63,9 @@ public class ClientMain extends ClientFenster{
 		
 		//Listener, der beim Schließen des Fenster die TCP-Verbindung trennt
 		addWindowListener(new fensterSchliessenListener());	
+		
+		//Listener, die einen Button-Klick beim Loginfenster entgegennehmen
+		login.addActionListenerButtons(new buttonKlickListener());
 	}
 		
 
@@ -115,6 +118,7 @@ public class ClientMain extends ClientFenster{
 	private class buttonKlickListener implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
+			System.out.println(e.getActionCommand());
 		}
 		
 	}

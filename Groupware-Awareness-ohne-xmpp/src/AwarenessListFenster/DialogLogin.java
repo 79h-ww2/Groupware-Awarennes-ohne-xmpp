@@ -58,7 +58,7 @@ public class DialogLogin extends JDialog {
 		panelButtonRechtsplatzieren.add(panelButtonBereich, BorderLayout.EAST);
 		panelButtonBereich.add(btnLogin = new JButton("Login"));
 		panelButtonBereich.add(btnRegistieren = new JButton("Registrieren"));
-		panelButtonBereich.add(btnRegistieren = new JButton("Abbrechen"));
+		panelButtonBereich.add(btnAbbrechen = new JButton("Abbrechen"));
 		panelButtonBereich.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 				
 		
@@ -72,26 +72,12 @@ public class DialogLogin extends JDialog {
 	}
 	
 	/**
-	 * fügt zum Login-Button einen ActionListener hinzu
+	 * fügt einen Listener hinzu, der beim einen Button-Klick ausgeführt wird
 	 * @param l Der ActionListener
 	 */
-	public void addActionListenerLoginButton(ActionListener l){
+	public void addActionListenerButtons(ActionListener l){
 		btnLogin.addActionListener(l);
-	}
-	
-	/**
-	 * fügt zum Abbrechen-Button einen ActionListener hinzu
-	 * @param l Der ActionListener
-	 */
-	public void addActionListenerAbbrechenButton(ActionListener l){
 		btnAbbrechen.addActionListener(l);
-	}
-	
-	/**
-	 * fügt zum Registierungs-Button einen ActionListener hinzu
-	 * @param l Der ActionListener
-	 */
-	public void addActionListenerRegButton(ActionListener l){
 		btnRegistieren.addActionListener(l);
 	}
 	
