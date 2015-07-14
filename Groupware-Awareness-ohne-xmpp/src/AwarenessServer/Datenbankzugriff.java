@@ -118,6 +118,33 @@ public class Datenbankzugriff {
 	}
 	
 	/**
+	 * Lädt die Kontaktlistenänderung seid einer Uhrzeit
+	 * @param benutzer Der Benutzer von den die Kontaktliste geladen werden soll
+	 * @param zeitpunkt Zeitpunkt, der letzten Änderung des Clients
+	 * @return Die Kontaktliste
+	 */
+	public ResultSet get_kontaktliste_update(String benutzer, long zeitpunkt){
+		
+		ResultSet rueckgabewert = null;
+		try{
+			String query = "select  k.benutzername, k.online, k.statusnachricht, k.statussymbol "
+					+ "from "
+					+ "kontaktliste, benutzer AS k, benutzer AS b "
+					+ "where b.benutzername = ? and b.bNr = kontaktliste.besitzer and k.bNr = kontaktliste.kontakt and k.status_aktuell_seit > ?;";
+			
+			PreparedStatement anweisung = con.prepareStatement(query);
+			anweisung.setString(1, benutzer);
+			anweisung.setLong(2, zeitpunkt);
+			rueckgabewert = anweisung.executeQuery();
+			
+		} catch (SQLException e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(1);
+		}
+		return rueckgabewert;
+	}
+	
+	/**
 	 * legt einen neuen Benutzer in der Datenbank an
 	 * @param benutzername Benutzername des neuen Benutzers
 	 * @param passwort Passwort des neuen Benutzers
@@ -193,6 +220,28 @@ public class Datenbankzugriff {
 			
 			anweisung.setInt(1, bNr);
 			anweisung.setInt(2, kNr);
+	
+			anweisung.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(1);
+		}
+	}
+	
+	/**
+	 * Änder den Online-Status eines Benutzers
+	 * @param benutzer Der Benutzer
+	 * @param online Sein nuer Online-Status
+	 */
+	public void aendereOnlineStatus(String benutzer, boolean online){
+
+		try{
+			String query ="update benutzer set online = ?, status_aktuell_seit = ? where benutzername = ?";
+			PreparedStatement anweisung = con.prepareStatement(query);
+			
+			anweisung.setBoolean(1, online);
+			anweisung.setLong(2, System.currentTimeMillis());
+			anweisung.setString(3, benutzer);
 	
 			anweisung.executeUpdate();
 		} catch (SQLException e) {

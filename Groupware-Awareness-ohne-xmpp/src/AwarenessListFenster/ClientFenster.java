@@ -123,12 +123,8 @@ public abstract class ClientFenster  extends JFrame{
 		comStatusSymbol.setRenderer(new LayoutZeileComboBox<JLabel>());
 		comStatusSymbol.setVisible(true);
 		
-		werteAwarenessListe = new Vector<>();
-		werteAwarenessListe.add(new AwarenessListZeile("Hugo", "Wütend", new ImageIcon(System.getProperty("user.dir") + "/bilder/" + zeileIcons[1]),false));
-		werteAwarenessListe.add(new AwarenessListZeile("Susi", "Müde", new ImageIcon(System.getProperty("user.dir") + "/bilder/" + zeileIcons[3]),true));
-		
 		//ListBox erstellen, wo die Awareness-Informationen angezeigt werden
-		awarenessListe = new JList<>(werteAwarenessListe);
+		awarenessListe = new JList<>();
 		awarenessListe.setCellRenderer(new LayoutZeileAwarenessList<AwarenessListZeile>());
 		scrollLeistenAwarenessListen = new JScrollPane(awarenessListe);
 		scrollLeistenAwarenessListen.setVisible(true);

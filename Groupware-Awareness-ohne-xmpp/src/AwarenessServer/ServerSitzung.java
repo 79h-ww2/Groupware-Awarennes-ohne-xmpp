@@ -18,6 +18,7 @@ public class ServerSitzung implements Runnable{
 	
 	//Instanz-Variable, womit die Anfragen des Clients entgegebngenommen und beantwortet werden
 	private Socket sitzung;
+	private String benutzer_ = null;
 	
 	/**
 	 * Konstruktor der Server-Sitzung
@@ -39,7 +40,7 @@ public class ServerSitzung implements Runnable{
 	 * Thread-Methode, die den Sitzungsprozess abarbeitet
 	 */
 	public void run() {
-		try {
+		try {			
 			//definert einen Scanner, der auf Clientanfragen lauscht
 			Scanner clientAnfrage = new Scanner(sitzung.getInputStream());
 			
@@ -75,7 +76,14 @@ public class ServerSitzung implements Runnable{
 						 * Anfrage auf eine Kontaktliste
 						 */
 						else if(feld1.equals("get-kontaktlist")){
-							kontaktlisteSenden(serverAntwort, arrClientAnfrage);
+							kontaktlisteSenden(serverAntwort, arrClientAnfrage, false);
+						}
+						
+						/*
+						 * Lädt die Kontaktlisteänderungen nach einer bestimmten Zeit
+						 */
+						else if(feld1.equals("get-aenderung-kontaktlist")){
+							kontaktlisteSenden(serverAntwort, arrClientAnfrage, true);
 						}
 						
 						/*
@@ -102,6 +110,13 @@ public class ServerSitzung implements Runnable{
 				}
 			}while(!quit);
 			
+			//ändert den Online-Status des Benutzers auf offline
+			if (benutzer_ != null){
+				Datenbankzugriff dbZugriff = new Datenbankzugriff();
+				dbZugriff.aendereOnlineStatus(benutzer_, false);
+				dbZugriff.verbindungSchliessen();
+			}
+			
 			sitzung.close();
 		
 		//Exception, die aufgerufen wird, wenn ein Fehler aufgetreten ist
@@ -119,21 +134,29 @@ public class ServerSitzung implements Runnable{
 	 * Sendet die Kontaktliste an den Client
 	 * @throws SQLException 
 	 */
-	public void kontaktlisteSenden(PrintStream ausgabeServer, String[] clientAnfrage) throws SQLException{
+	public void kontaktlisteSenden(PrintStream ausgabeServer, String[] clientAnfrage, boolean update) throws SQLException{
 		
 		//stellt eine Verbindung zur Datenbank her
 		Datenbankzugriff dbZugriff = new Datenbankzugriff();
 		
-		System.out.printf("Der Client %s fragt die Kontaktliste ab.%n", sitzung.getInetAddress().getHostAddress());
-		
-		//fragt von der Datenbank die Kontaktliste ab
-		ResultSet kontaktliste = dbZugriff.get_kontaktliste(clientAnfrage[1]);
+		ResultSet kontaktliste = null;
+		//lädt die komplette Kontaktliste aus der Datenbank
+		if (!update){
+			System.out.printf("Der Client %s fragt die Kontaktliste ab.%n", sitzung.getInetAddress().getHostAddress());
+			//fragt von der Datenbank die Kontaktliste ab
+			kontaktliste = dbZugriff.get_kontaktliste(clientAnfrage[1]);
+		}
+		//lädt nur die Änderungen aus der Datenbank
+		else{
+			//System.out.printf("Der Client %s lädt Kontaktlistenupdates.%n", sitzung.getInetAddress().getHostAddress());
+			kontaktliste = dbZugriff.get_kontaktliste_update(clientAnfrage[1], Long.valueOf(clientAnfrage[2]));
+		}
 		String kontaktliste_str ="";
 		
 		//geht jede Zeile der Kontaktliste durch
 		while(kontaktliste.next()){
 			//erstellt aus der Kontaktliste einen String, der via TCP übermittelt werden kann
-			kontaktliste_str = "(" + kontaktliste.getString(0) + "," + kontaktliste.getBoolean(1) + "," + kontaktliste.getString(2) + "," + kontaktliste.getString(3) + ")";
+			kontaktliste_str = kontaktliste.getString(1) + "#§" + kontaktliste.getBoolean(2) + "#§" + kontaktliste.getString(3) + "#§" + kontaktliste.getString(4);
 			
 			//sendet die Kontaktlistenzeile an den Client
 			ausgabeServer.println(kontaktliste_str);
@@ -194,7 +217,14 @@ public class ServerSitzung implements Runnable{
 		ausgabeServer.println(wert);
 		ausgabeServer.println("§Ende§"); //Nachrichten Ende wird übertragen
 		
-		if ( wert != -1) System.out.printf ("Der Client %s hat sich erfolgreich angemeldet.%n", sitzung.getInetAddress().getHostAddress());
+		if ( wert != -1) {
+			System.out.printf ("Der Client %s hat sich erfolgreich angemeldet.%n", sitzung.getInetAddress().getHostAddress());
+			
+			//ändert den online-Status des Benutzers aus online
+			dbZugriff.aendereOnlineStatus(benutzer, true);
+			
+			benutzer_ = benutzer;
+		}
 		
 		//trennt die Datenbankverbindung
 		dbZugriff.verbindungSchliessen();
