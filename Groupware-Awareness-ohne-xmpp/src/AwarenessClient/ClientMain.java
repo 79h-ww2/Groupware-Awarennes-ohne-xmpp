@@ -90,9 +90,7 @@ public class ClientMain extends ClientFenster{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-		ClientMain clientFenster = new ClientMain();
-
+			ClientMain clientFenster = new ClientMain();
 	}
 	
 	/**
