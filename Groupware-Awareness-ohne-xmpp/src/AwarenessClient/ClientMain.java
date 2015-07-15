@@ -90,17 +90,9 @@ public class ClientMain extends ClientFenster{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-<<<<<<< HEAD
 
 		ClientMain clientFenster = new ClientMain();
 
-=======
-		if (args.length < 1){
-			System.out.println("Bitte geben Sie die Adresse zum Server als Parameter an.");
-		}else{
-			ClientMain clientFenster = new ClientMain();
-		}
->>>>>>> refs/remotes/origin/master
 	}
 	
 	/**
