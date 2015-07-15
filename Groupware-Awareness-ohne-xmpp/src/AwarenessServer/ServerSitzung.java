@@ -97,7 +97,7 @@ public class ServerSitzung implements Runnable{
 						 * überprüft die Login-Daten
 						 */
 						else if (feld1.equals("check-login")){
-							ueberprüfeLoginDaten(arrClientAnfrage[1], arrClientAnfrage[2], serverAntwort);
+							ueberpruefeLoginDaten(arrClientAnfrage[1], arrClientAnfrage[2], serverAntwort);
 						}
 						
 						/*
@@ -238,7 +238,7 @@ public class ServerSitzung implements Runnable{
 	 * @param passwort Das übergeben Passwort
 	 * @param ausgabeServer Ausgabe-Stream des Server zum Client
 	 */
-	public void ueberprüfeLoginDaten(String benutzer, String passwort, PrintStream ausgabeServer){
+	public void ueberpruefeLoginDaten(String benutzer, String passwort, PrintStream ausgabeServer){
 		Datenbankzugriff dbZugriff = new Datenbankzugriff();
 		//übermittelt die bestimmte Benutzer-ID
 		int wert = dbZugriff.loginCheck(benutzer, passwort);

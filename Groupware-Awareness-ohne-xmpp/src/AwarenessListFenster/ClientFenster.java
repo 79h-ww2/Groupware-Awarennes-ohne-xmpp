@@ -63,7 +63,7 @@ public abstract class ClientFenster  extends JFrame{
 		getJMenuBar().add(kontakteMenu);
 		kontakteMenu.setVisible(true);
 		getJMenuBar().setVisible(true);
-		kontaktHinzufuegen = new JMenuItem("Kontakt hinzufügen");
+		kontaktHinzufuegen = new JMenuItem("Kontakt hinzufuegen");
 		kontakteMenu.add(kontaktHinzufuegen);
 		kontaktHinzufuegen.setVisible(true);
 		
@@ -93,7 +93,7 @@ public abstract class ClientFenster  extends JFrame{
 		//Vektor, der die Zeilen der Combo-Box enthält, wo der Status ausgewählt werden kann
 		Vector<JLabel> comboEintraegeStatus =  new Vector<JLabel>();
 		String[] zeileIcons = {"online.png", "abwsend.png", "laenger_abwesend.png", "beschaeftigt.png"};
-		String[] zeileBeschriftung = {"Online", "Abwesend", "Länger Abwesend", "Beschäftigt"};
+		String[] zeileBeschriftung = {"Online", "Abwesend", "Laenger Abwesend", "Beschaeftigt"};
 		
 		for( int i = 0; i < zeileIcons.length; i++){
 			//bestimmt die Adresse des Icons

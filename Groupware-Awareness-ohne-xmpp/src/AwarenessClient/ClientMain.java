@@ -135,7 +135,7 @@ public class ClientMain extends ClientFenster{
 		public void itemStateChanged(ItemEvent e) {
 			if ( e.getStateChange() == ItemEvent.SELECTED){
 				JLabel auswahl = (JLabel)e.getItem();
-				String[] zeileBeschriftung = {"Online", "Abwesend", "Länger Abwesend", "Beschäftigt"};
+				String[] zeileBeschriftung = {"Online", "Abwesend", "Laenger Abwesend", "Beschaeftigt"};
 				String[] wertAnfrage = {"chat", "away", "xa", "dnd"};
 				
 				for(int i = 0; i < zeileBeschriftung.length; i++){
@@ -246,11 +246,11 @@ public class ClientMain extends ClientFenster{
 			/*
 			 * Benutzer möchte einen neuen Kontakt zur Kontaktliste hinzufügen
 			 */
-			else if (e.getActionCommand().equals("Kontakt hinzufügen")){
+			else if (e.getActionCommand().equals("Kontakt hinzufuegen")){
 				if (kontaktZurKontaktlisteHinzufuegen()){
-					JOptionPane.showMessageDialog(null, "Der Kontakt wurde erfolgreich zur Kontaktliste hinzugefügt.", "Hinzufügen erfolgreich", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Der Kontakt wurde erfolgreich zur Kontaktliste hinzugefuegt.", "Hinzufuegen erfolgreich", JOptionPane.INFORMATION_MESSAGE);
 				}else{
-					JOptionPane.showMessageDialog(null, "Der kontakt exisiert nicht.", "Hinzufügen Fehlgeschlagen", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Der Kontakt exisiert nicht.", "Hinzufuegen Fehlgeschlagen", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
