@@ -42,7 +42,7 @@ public class ClientMain extends ClientFenster{
 	/**
 	 * Konstruktor des Clients
 	 */
-	public ClientMain(String adresse){
+	public ClientMain(/*String adresse*/){
 		super("Awareness-Liste ohne XMPP");
 		
 		//Variabel, die den Thread pausiert, wenn auf andere Anfragen gewartet wird
@@ -52,6 +52,7 @@ public class ClientMain extends ClientFenster{
 		
 		//TCP-Verbindung zum Server wird aufgebaut
 		try {
+			String adresse = JOptionPane.showInputDialog(this, "Bitte geben Sie IP-Adresse des Servers an.");
 			client = new Socket(adresse, 12345);
 			verbindungGeschlossen = false;
 			
@@ -92,7 +93,7 @@ public class ClientMain extends ClientFenster{
 		if (args.length < 1){
 			System.out.println("Bitte geben Sie die Adresse zum Server als Parameter an.");
 		}else{
-			ClientMain clientFenster = new ClientMain(args[0]);
+			ClientMain clientFenster = new ClientMain();
 		}
 	}
 	
@@ -447,8 +448,15 @@ public class ClientMain extends ClientFenster{
 								adresseSymbol = pfadZumIcon + icons.get(werte[3]);
 							}
 							
+							String statusmeldung = "";
 							//Wenn der Kontakt keine Statusnachricht angegeben hat wird einfach online angezeigt
-							String statusmeldung = werte[2].equals("null") ? "online" : werte[2];
+							if ( werte[2].equals("null") && werte[1].equals("true")){
+								statusmeldung = werte[2].equals("null") ? "online" : werte[2];
+							}else if (werte[2].equals("null") && werte[1].equals("false")){
+								statusmeldung = werte[2].equals("null") ? "offline" : werte[2];
+							}
+							
+							statusmeldung = werte[2].equals("null") ? "online" : werte[2];
 							
 							//speichert die Zeile im Vektor
 							AwarenessListZeile zeile = new AwarenessListZeile(werte[0], statusmeldung , new ImageIcon(adresseSymbol), farbwechsel);
