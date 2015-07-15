@@ -127,6 +127,7 @@ public class ClientMain extends ClientFenster{
 	 */
 	private class statusSymbolListener implements ItemListener{
 		
+		//
 		/**
 		 * Sendet zum Server das neue Statussymbol
 		 */
