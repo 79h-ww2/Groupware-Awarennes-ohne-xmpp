@@ -133,7 +133,7 @@ public class ClientMain extends ClientFenster{
 		public void itemStateChanged(ItemEvent e) {
 			if ( e.getStateChange() == ItemEvent.SELECTED){
 				JLabel auswahl = (JLabel)e.getItem();
-				String[] zeileBeschriftung = {"Online", "Abwesend", "Länger Abwesend", "Beschäftigt"};
+				String[] zeileBeschriftung = {"Online", "Abwesend", "Laenger Abwesend", "Beschaeftigt"};
 				String[] wertAnfrage = {"chat", "away", "xa", "dnd"};
 				
 				for(int i = 0; i < zeileBeschriftung.length; i++){
