@@ -42,7 +42,7 @@ public class ClientMain extends ClientFenster{
 	/**
 	 * Konstruktor des Clients
 	 */
-	public ClientMain(){
+	public ClientMain(String adresse){
 		super("Awareness-Liste ohne XMPP");
 		
 		//Variabel, die den Thread pausiert, wenn auf andere Anfragen gewartet wird
@@ -52,7 +52,7 @@ public class ClientMain extends ClientFenster{
 		
 		//TCP-Verbindung zum Server wird aufgebaut
 		try {
-			client = new Socket("127.0.0.1", 12345);
+			client = new Socket(adresse, 12345);
 			verbindungGeschlossen = false;
 			
 			//Streams für den Datenin- und -output werden definiert
@@ -89,7 +89,11 @@ public class ClientMain extends ClientFenster{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ClientMain clientFenster = new ClientMain();
+		if (args.length < 1){
+			System.out.println("Bitte geben Sie die Adresse zum Server als Parameter an.");
+		}else{
+			ClientMain clientFenster = new ClientMain(args[0]);
+		}
 	}
 	
 	/**
