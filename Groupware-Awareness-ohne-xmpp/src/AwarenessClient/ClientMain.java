@@ -90,11 +90,7 @@ public class ClientMain extends ClientFenster{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (args.length < 1){
-			System.out.println("Bitte geben Sie die Adresse zum Server als Parameter an.");
-		}else{
 			ClientMain clientFenster = new ClientMain();
-		}
 	}
 	
 	/**
@@ -129,6 +125,7 @@ public class ClientMain extends ClientFenster{
 	 */
 	private class statusSymbolListener implements ItemListener{
 		
+		//
 		/**
 		 * Sendet zum Server das neue Statussymbol
 		 */
