@@ -41,7 +41,7 @@ public class Datenbankzugriff {
 			String dbQuery= "CREATE TABLE IF NOT EXISTS benutzer ("
 					+ "bNr INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "benutzername VARCHAR(45) NOT NULL,"
-					+ "statusnachricht VARCHAR(50),"
+					+ "statusnachricht text,"
 					+ "statussymbol VARCHAR(4),"
 					+ "status_aktuell_seit INTEGER," 
 					+ "passwort VARCHAR(50) NOT NULL,"
@@ -215,13 +215,30 @@ public class Datenbankzugriff {
 		int bNr = bestimmeBNrBenutzer(besitzer);
 
 		try{
-			String query ="insert into kontaktliste (besitzer, kontakt) values(?, ?);";
-			PreparedStatement anweisung = con.prepareStatement(query);
+			//überprüft, ob der Konktakt noch nicht in der Kontaktliste ist
+			boolean gefunden = false;
+			ResultSet rueckgabewert = null;
+			String query1 ="select count(*) from kontaktliste where besitzer = ? and kontakt = ?";
+			PreparedStatement anweisung1 = con.prepareStatement(query1);
 			
-			anweisung.setInt(1, bNr);
-			anweisung.setInt(2, kNr);
-	
-			anweisung.executeUpdate();
+			anweisung1.setString(1, besitzer);
+			anweisung1.setString(1, kontakt);
+			rueckgabewert = anweisung1.executeQuery();
+			
+			//werdet den Rückgabewert aus
+			while(rueckgabewert.next()){
+				gefunden = rueckgabewert.getBoolean(1);
+			}
+			
+			if(!gefunden){
+				//fügt den Kontakt zur Kontakliste hinzu
+				String query ="insert into kontaktliste (besitzer, kontakt) values(?, ?);";
+				PreparedStatement anweisung = con.prepareStatement(query);
+				
+				anweisung.setInt(1, bNr);
+				anweisung.setInt(2, kNr);		
+				anweisung.executeUpdate();
+			}
 		} catch (SQLException e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(1);
@@ -278,7 +295,7 @@ public class Datenbankzugriff {
 	 * @param nachricht Die neue Statusnachricht
 	 */
 	public void aendereStatusnachricht(String benutzer, String nachricht){
-
+		
 		try{
 			String query ="update benutzer set status_aktuell_seit = ?, statusnachricht = ? where benutzername = ?";
 			PreparedStatement anweisung = con.prepareStatement(query);

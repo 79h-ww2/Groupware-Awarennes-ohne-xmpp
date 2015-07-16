@@ -38,6 +38,7 @@ public class ClientMain extends ClientFenster{
 	private Scanner antwort;
 	private boolean serverLock;
 	private boolean geradeGestartet;
+	private boolean neuerStatustext;
 	
 	/**
 	 * Konstruktor des Clients
@@ -48,6 +49,7 @@ public class ClientMain extends ClientFenster{
 		//Variabel, die den Thread pausiert, wenn auf andere Anfragen gewartet wird
 		serverLock = false;
 		geradeGestartet = true;
+		neuerStatustext = false;
 		
 		
 		//TCP-Verbindung zum Server wird aufgebaut
@@ -82,6 +84,9 @@ public class ClientMain extends ClientFenster{
 		
 		//Listener, der auf eine Änderung im Statustextfeld lauscht
 		txtStatusnachricht.getDocument().addDocumentListener(new StatusTextAenderungListener());
+		
+		//Thread, der die Statusnachrichten überträgt
+		new StatusNachrichtUebertragen();
 	}
 		
 
@@ -94,12 +99,43 @@ public class ClientMain extends ClientFenster{
 	}
 	
 	/**
+	 * Ein Thread, der die Statusnachrichten in einen bestimmten Abstand überträgt
+	 * Damit nicht beim Tippen jedes Zeichen einzeln übertragen wird
+	 * @author benedikt
+	 *
+	 */
+	private class StatusNachrichtUebertragen implements Runnable{
+		
+		public StatusNachrichtUebertragen(){
+			//startet einen Thread, der die Statusnachrichten überträgt
+			Thread t = new Thread(this);
+			t.start();
+		}
+				
+		public void run() {
+			while (true){
+				if (neuerStatustext){
+					String text = txtStatusnachricht.getText().equals("") ? "null" : txtStatusnachricht.getText();
+					anfragen.println("set-statusnachricht#§" + login.getBenutzername() +"#§" + text );
+					neuerStatustext= false;
+				}
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					
+				}
+			}			
+		}
+		
+	}
+	
+	/**
 	 * Listener, der die Änderung der Statusnachricht an den Server überträgt
 	 * @author Benedikt Brüntrup
 	 *
 	 */
 	private class StatusTextAenderungListener implements DocumentListener{
-
+		
 		public void insertUpdate(DocumentEvent e) {
 			textAenderung(e);;	
 		}
@@ -113,8 +149,7 @@ public class ClientMain extends ClientFenster{
 		}
 		
 		public void textAenderung(DocumentEvent e){
-			String text = txtStatusnachricht.getText().equals("") ? "null" : txtStatusnachricht.getText();
-			anfragen.println("set-statusnachricht#§" + login.getBenutzername() +"#§" + text );
+			neuerStatustext = true;
 		}
 		
 	}
@@ -445,15 +480,15 @@ public class ClientMain extends ClientFenster{
 								adresseSymbol = pfadZumIcon + icons.get(werte[3]);
 							}
 							
-							String statusmeldung = "";
+							String statusmeldung = werte[2];
 							//Wenn der Kontakt keine Statusnachricht angegeben hat wird einfach online angezeigt
 							if ( werte[2].equals("null") && werte[1].equals("true")){
-								statusmeldung = werte[2].equals("null") ? "online" : werte[2];
+								statusmeldung = "online";
 							}else if (werte[2].equals("null") && werte[1].equals("false")){
-								statusmeldung = werte[2].equals("null") ? "offline" : werte[2];
+								statusmeldung = "offline";
 							}
 							
-							statusmeldung = werte[2].equals("null") ? "online" : werte[2];
+							//statusmeldung = werte[2].equals("null") ? "online" : werte[2];
 							
 							//speichert die Zeile im Vektor
 							AwarenessListZeile zeile = new AwarenessListZeile(werte[0], statusmeldung , new ImageIcon(adresseSymbol), farbwechsel);

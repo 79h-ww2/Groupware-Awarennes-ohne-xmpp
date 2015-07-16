@@ -112,7 +112,8 @@ public class ServerSitzung implements Runnable{
 						 */
 						else if (feld1.equals("set-symbol")){
 							Datenbankzugriff dbZugriff = new Datenbankzugriff();
-							dbZugriff.aendereStatusSymbol(arrClientAnfrage[1], arrClientAnfrage[2]);
+							dbZugriff.aendereStatusSymbol(arrClientAnfrage[1], arrClientAnfrage[2]);							
+							//dbZugriff.aendereOnlineStatus(arrClientAnfrage[1], true); //markiert, dass der Benutzer online ist
 							dbZugriff.verbindungSchliessen();
 						}
 						
@@ -214,6 +215,8 @@ public class ServerSitzung implements Runnable{
 			//bestätigt das Anlegen des Benutzers
 			ausgabeServer.println("ok");
 			ausgabeServer.println("§Ende§"); //Nachrichten Ende wird übertragen	
+			
+			benutzer_ = benutzername;
 			
 			System.out.printf ("Der Client: %s hat einen neuen Benutzer angelegt.%n", sitzung.getInetAddress().getHostAddress());
 		}
